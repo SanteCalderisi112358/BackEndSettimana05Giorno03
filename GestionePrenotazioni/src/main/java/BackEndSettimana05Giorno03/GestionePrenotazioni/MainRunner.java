@@ -1,5 +1,6 @@
 package BackEndSettimana05Giorno03.GestionePrenotazioni;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Locale;
 
@@ -11,9 +12,14 @@ import com.github.javafaker.Faker;
 
 import BackEndSettimana05Giorno03.GestionePrenotazioni.Edificio.EdificioController;
 import BackEndSettimana05Giorno03.GestionePrenotazioni.Edificio.EdificioService;
+import BackEndSettimana05Giorno03.GestionePrenotazioni.Postazione.NotPostazioneFoundException;
 import BackEndSettimana05Giorno03.GestionePrenotazioni.Postazione.Postazione;
 import BackEndSettimana05Giorno03.GestionePrenotazioni.Postazione.PostazioneController;
 import BackEndSettimana05Giorno03.GestionePrenotazioni.Postazione.PostazioneService;
+import BackEndSettimana05Giorno03.GestionePrenotazioni.Prenotazione.NotPrenotazioneFoundException;
+import BackEndSettimana05Giorno03.GestionePrenotazioni.Prenotazione.PrenotazioneController;
+import BackEndSettimana05Giorno03.GestionePrenotazioni.Prenotazione.PrenotazioneRequestPayload;
+import BackEndSettimana05Giorno03.GestionePrenotazioni.Utente.NotUtenteFoundException;
 import BackEndSettimana05Giorno03.GestionePrenotazioni.Utente.Utente;
 import BackEndSettimana05Giorno03.GestionePrenotazioni.Utente.UtenteController;
 import BackEndSettimana05Giorno03.GestionePrenotazioni.Utente.UtenteService;
@@ -33,6 +39,8 @@ public class MainRunner implements CommandLineRunner {
 	PostazioneService postazioneSrv;
 	@Autowired
 	EdificioService edificioSrv;
+	@Autowired
+	PrenotazioneController prenotazioneCtrl;
 	@Override
 	public void run(String... args) throws Exception {
 		Faker faker = new Faker(Locale.ITALIAN);
@@ -73,11 +81,29 @@ public class MainRunner implements CommandLineRunner {
 //		listaEdifici.forEach(ed -> System.err.println(ed));
 		System.err.println("ciao mondo");
 
+		/* ISTANZIO 1 PRENOTAZIONE E TEST */
+		try {
+			Utente utenteChePrenota = utenteSrv.findById(1103);
+			int idUtenteChePrenota = utenteChePrenota.getId();
+			Postazione postazioneDaPrenotare = postazioneSrv.findById(40);
+			int idPostazioneDaPrenotare = postazioneDaPrenotare.getId();
+			PrenotazioneRequestPayload nuovaPrenotazione = new PrenotazioneRequestPayload(idUtenteChePrenota,
+					idPostazioneDaPrenotare, LocalDate.now());
+			System.err.println(nuovaPrenotazione.toString());
+			prenotazioneCtrl.savePrenotazione(nuovaPrenotazione);
+		} catch (NotUtenteFoundException ex) {
+			System.err.println(ex.getMessage());
+		} catch (NotPostazioneFoundException ex) {
+			System.err.println(ex.getMessage());
+		} catch (NotPrenotazioneFoundException ex) {
+			System.err.println(ex.getMessage());
+		}
+
 		/* ISTANZIO 10 PRENOTAZIONI */
 		List<Utente> listaUtente = utenteSrv.findNoPage();
-		listaUtente.forEach(u -> System.err.println(u));
+		// listaUtente.forEach(u -> System.err.println(u));
 		List<Postazione> listaPostazioni = postazioneSrv.findNoPage();
-		listaPostazioni.forEach(pos -> System.err.println(pos));
+		// listaPostazioni.forEach(pos -> System.err.println(pos));
 	}
 
 }
