@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import BackEndSettimana05Giorno03.GestionePrenotazioni.Postazione.Postazione;
+import BackEndSettimana05Giorno03.GestionePrenotazioni.Postazione.PostazioneRequestPayload;
 import BackEndSettimana05Giorno03.GestionePrenotazioni.Postazione.PostazioneService;
 import BackEndSettimana05Giorno03.GestionePrenotazioni.Utente.Utente;
 import BackEndSettimana05Giorno03.GestionePrenotazioni.Utente.UtenteService;
@@ -37,12 +38,23 @@ public class PrenotazioneService {
 		Postazione postazione = postazioneSrv.findById(idPostazione);
 		if (!postazione.isLibera()) {
 			throw new NotPrenotazioneFoundException("La postazione " + idPostazione + " è già occupata");
+		} else if (utenteSrv.checkUtentePrenotazioneGiorno(idUtente, body.getDataInizioPrenotazione()) > 0) {
+
+			throw new NotPrenotazioneFoundException(
+					utente.toString() + " ha già una prenotazione per il giorno " + body.getDataInizioPrenotazione());
+		} else {
+			postazione.setLibera(false);
+			System.err.println(postazione.isLibera());
+			PostazioneRequestPayload postazionePayload = new PostazioneRequestPayload(postazione.getDescrizione(),
+					postazione.getTipoPostazione(), postazione.getCapienzaMax(), postazione.isLibera(),
+					postazione.getEdificio());
+			System.err.println(postazionePayload.toString());
+			postazioneSrv.findByIdAndUpdate(idPostazione, postazionePayload);
+			Prenotazione nuovaPrenotazione = new Prenotazione(body.getDataInizioPrenotazione(), utente, postazione);
+
+			return prenotazioneRepo.save(nuovaPrenotazione);
 		}
-		return null;
-		// Prenotazione nuovaPrenotazione = new
-		// Prenotazione(body.getDataInizioPrenotazione(), body.(), body.getUsername(),
-		// body.getEmail());
-		// return prenotazioneRepo.save(nuovaPrenotazione);
+
 	}
 
 	public Page<Prenotazione> find(int page, int size, String sort) {
@@ -54,20 +66,22 @@ public class PrenotazioneService {
 	public Prenotazione findById(int id) throws NotPrenotazioneFoundException {
 		return prenotazioneRepo.findById(id).orElseThrow(() -> new NotPrenotazioneFoundException(id));
 	}
-//
-//	public Utente findByIdAndUpdate(int id, UtenteRequestPayload body) throws NotUtenteFoundException {
-//		Utente found = this.findById(id);
-//		found.setEmail(body.getEmail());
-//		found.setNome(body.getNome());
-//		found.setCognome(body.getCognome());
-//		found.setUsername(body.getUsername());
-//
-//		return utenteRepo.save(found);
-//	}
-//
-//	public void findByIdAndDelete(int id) throws NotUtenteFoundException {
-//		Utente found = this.findById(id);
-//		utenteRepo.delete(found);
-//	}
+
+	public Prenotazione findByIdAndUpdate(int id, PrenotazioneRequestPayload body)
+			throws NotPrenotazioneFoundException {
+		Prenotazione found = this.findById(id);
+		Utente utente = utenteSrv.findById(body.getIdUtente());
+		Postazione postazione = postazioneSrv.findById(body.getIdPostazione());
+		found.setUtente(utente);
+		found.setPostazione(postazione);
+		found.setDataInizioPrenotazione(body.getDataInizioPrenotazione());
+
+		return prenotazioneRepo.save(found);
+	}
+
+	public void findByIdAndDelete(int id) throws NotPrenotazioneFoundException {
+		Prenotazione found = this.findById(id);
+		prenotazioneRepo.delete(found);
+	}
 
 }

@@ -1,5 +1,6 @@
 package BackEndSettimana05Giorno03.GestionePrenotazioni.Utente;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class UtenteService {
 		return utenteRepo.save(newUser);
 	}
 
+	public int checkUtentePrenotazioneGiorno(int idUtente, LocalDate data) {
+		return utenteRepo.checkPrenotazioneNvoltePerUtente(idUtente, data);
+	}
 	public Page<Utente> find(int page, int size, String sort) {
 		Pageable pageable = PageRequest.of(page, size, Sort.by(sort)); // (numero di pagina, numero di elementi per
 																		// pagina, nome del campo per cui sortare)

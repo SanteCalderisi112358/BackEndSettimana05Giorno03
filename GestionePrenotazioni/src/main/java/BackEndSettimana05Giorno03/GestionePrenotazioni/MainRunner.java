@@ -78,14 +78,14 @@ public class MainRunner implements CommandLineRunner {
 //		}
 
 
-//		listaEdifici.forEach(ed -> System.err.println(ed));
+
 		System.err.println("ciao mondo");
 
 		/* ISTANZIO 1 PRENOTAZIONE E TEST */
 		try {
-			Utente utenteChePrenota = utenteSrv.findById(1103);
+			Utente utenteChePrenota = utenteSrv.findById(1110);
 			int idUtenteChePrenota = utenteChePrenota.getId();
-			Postazione postazioneDaPrenotare = postazioneSrv.findById(40);
+			Postazione postazioneDaPrenotare = postazioneSrv.findById(1);
 			int idPostazioneDaPrenotare = postazioneDaPrenotare.getId();
 			PrenotazioneRequestPayload nuovaPrenotazione = new PrenotazioneRequestPayload(idUtenteChePrenota,
 					idPostazioneDaPrenotare, LocalDate.now());
